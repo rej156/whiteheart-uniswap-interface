@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next'
 
 import styled from 'styled-components'
 
-import Logo from '../../assets/svg/logo.svg'
-import LogoDark from '../../assets/svg/logo_white.svg'
+// import Logo from '../../assets/svg/logo.svg'
+// import LogoDark from '../../assets/svg/logo_white.svg'
 import { useActiveWeb3React } from '../../hooks'
 import { useDarkModeManager } from '../../state/user/hooks'
 import { useETHBalances } from '../../state/wallet/hooks'
@@ -240,7 +240,16 @@ export default function Header() {
       <HeaderRow>
         <Title href=".">
           <UniIcon>
-            <img width={'24px'} src={isDark ? LogoDark : Logo} alt="logo" />
+            <img
+              width={'24px'}
+              src={
+                // Eric's code
+                isDark
+                  ? 'https://pbs.twimg.com/profile_images/1310925247856640000/hGDrUPOp_400x400.png'
+                  : 'https://pbs.twimg.com/profile_images/1310925247856640000/hGDrUPOp_400x400.png'
+              }
+              alt="logo"
+            />
           </UniIcon>
         </Title>
         <HeaderLinks>
