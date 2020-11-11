@@ -15,6 +15,7 @@ export interface SwapState {
   }
   // the typed recipient address or ENS name, or null if swap should go to sender
   readonly recipient: string | null
+  readonly canHedge: boolean
 }
 
 const initialState: SwapState = {
@@ -26,7 +27,8 @@ const initialState: SwapState = {
   [Field.OUTPUT]: {
     currencyId: ''
   },
-  recipient: null
+  recipient: null,
+  canHedge: false
 }
 
 export default createReducer<SwapState>(initialState, builder =>
@@ -43,15 +45,19 @@ export default createReducer<SwapState>(initialState, builder =>
           },
           independentField: field,
           typedValue: typedValue,
-          recipient
+          recipient,
+          // Eric's code to check if the output is a WETH or ETH
+          canHedge: outputCurrencyId === WETH || outputCurrencyId === ETH
         }
       }
     )
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
       // Eric's code to check if the output is a WETH or ETH
+      let canHedge = false
       if ((currencyId === WETH || currencyId === ETH) && field === Field.OUTPUT) {
         console.log('selectCurrency')
         console.log(currencyId)
+        canHedge = true
       }
 
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT
@@ -61,28 +67,33 @@ export default createReducer<SwapState>(initialState, builder =>
           ...state,
           independentField: state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
           [field]: { currencyId: currencyId },
-          [otherField]: { currencyId: state[field].currencyId }
+          [otherField]: { currencyId: state[field].currencyId },
+          canHedge
         }
       } else {
         // the normal case
         return {
           ...state,
-          [field]: { currencyId: currencyId }
+          [field]: { currencyId: currencyId },
+          canHedge
         }
       }
     })
     .addCase(switchCurrencies, state => {
       // Eric's code to check if the output on the toggle/switch is a WETH or ETH
+      let canHedge = false
       if (state[Field.INPUT].currencyId === WETH || state[Field.INPUT].currencyId === ETH) {
         console.log('switchCurrencies')
         console.log(state[Field.INPUT].currencyId)
+        canHedge = true
       }
 
       return {
         ...state,
         independentField: state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
         [Field.INPUT]: { currencyId: state[Field.OUTPUT].currencyId },
-        [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId }
+        [Field.OUTPUT]: { currencyId: state[Field.INPUT].currencyId },
+        canHedge
       }
     })
     .addCase(typeInput, (state, { payload: { field, typedValue } }) => {

@@ -268,7 +268,9 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
     },
     typedValue: parseTokenAmountURLParameter(parsedQs.exactAmount),
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
-    recipient
+    recipient,
+    // Eric's code
+    canHedge: false
   }
 }
 
