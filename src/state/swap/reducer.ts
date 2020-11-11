@@ -1,6 +1,9 @@
 import { createReducer } from '@reduxjs/toolkit'
 import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
 
+const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+const ETH = 'ETH'
+
 export interface SwapState {
   readonly independentField: Field
   readonly typedValue: string
@@ -45,6 +48,12 @@ export default createReducer<SwapState>(initialState, builder =>
       }
     )
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
+      // Eric's code to check if the output is a WETH or ETH
+      if ((currencyId === WETH || currencyId === ETH) && field === Field.OUTPUT) {
+        console.log('selectCurrency')
+        console.log(currencyId)
+      }
+
       const otherField = field === Field.INPUT ? Field.OUTPUT : Field.INPUT
       if (currencyId === state[otherField].currencyId) {
         // the case where we have to swap the order
@@ -63,6 +72,12 @@ export default createReducer<SwapState>(initialState, builder =>
       }
     })
     .addCase(switchCurrencies, state => {
+      // Eric's code to check if the output on the toggle/switch is a WETH or ETH
+      if (state[Field.INPUT].currencyId === WETH || state[Field.INPUT].currencyId === ETH) {
+        console.log('switchCurrencies')
+        console.log(state[Field.INPUT].currencyId)
+      }
+
       return {
         ...state,
         independentField: state.independentField === Field.INPUT ? Field.OUTPUT : Field.INPUT,
