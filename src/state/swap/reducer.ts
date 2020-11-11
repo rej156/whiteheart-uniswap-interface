@@ -1,5 +1,13 @@
 import { createReducer } from '@reduxjs/toolkit'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
+import {
+  Field,
+  replaceSwapState,
+  selectCurrency,
+  setRecipient,
+  switchCurrencies,
+  switchHedge,
+  typeInput
+} from './actions'
 
 const WETH = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 const ETH = 'ETH'
@@ -16,6 +24,7 @@ export interface SwapState {
   // the typed recipient address or ENS name, or null if swap should go to sender
   readonly recipient: string | null
   readonly canHedge: boolean
+  readonly isHedging: boolean
 }
 
 const initialState: SwapState = {
@@ -28,14 +37,17 @@ const initialState: SwapState = {
     currencyId: ''
   },
   recipient: null,
-  canHedge: false
+  canHedge: false,
+  isHedging: false
 }
 
 export default createReducer<SwapState>(initialState, builder =>
   builder
+    // Eric's code to switch hedging state
+    .addCase(switchHedge, state => ({ ...state, isHedging: !state.isHedging }))
     .addCase(
       replaceSwapState,
-      (state, { payload: { typedValue, recipient, field, inputCurrencyId, outputCurrencyId } }) => {
+      (state, { payload: { typedValue, recipient, field, inputCurrencyId, outputCurrencyId, isHedging } }) => {
         return {
           [Field.INPUT]: {
             currencyId: inputCurrencyId
@@ -47,7 +59,8 @@ export default createReducer<SwapState>(initialState, builder =>
           typedValue: typedValue,
           recipient,
           // Eric's code to check if the output is a WETH or ETH
-          canHedge: outputCurrencyId === WETH || outputCurrencyId === ETH
+          canHedge: outputCurrencyId === WETH || outputCurrencyId === ETH,
+          isHedging
         }
       }
     )

@@ -224,7 +224,7 @@ export const ButtonEmpty = styled(Base)`
 export const ButtonWhite = styled(Base)`
   border: 1px solid #edeef2;
   background-color: ${({ theme }) => theme.bg1};
-  color: black;
+  color: white;
 
   &:focus {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -235,6 +235,8 @@ export const ButtonWhite = styled(Base)`
   }
   &:active {
     box-shadow: 0 0 0 1pt ${darken(0.1, '#edeef2')};
+    color: 'black';
+    background-color: ${({ theme }) => theme.secondary1};
   }
   &:disabled {
     opacity: 50%;

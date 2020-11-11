@@ -13,7 +13,15 @@ import useParsedQueryString from '../../hooks/useParsedQueryString'
 import { isAddress } from '../../utils'
 import { AppDispatch, AppState } from '../index'
 import { useCurrencyBalances } from '../wallet/hooks'
-import { Field, replaceSwapState, selectCurrency, setRecipient, switchCurrencies, typeInput } from './actions'
+import {
+  Field,
+  replaceSwapState,
+  selectCurrency,
+  setRecipient,
+  switchCurrencies,
+  switchHedge,
+  typeInput
+} from './actions'
 import { SwapState } from './reducer'
 import useToggledVersion from '../../hooks/useToggledVersion'
 import { useUserSlippageTolerance } from '../user/hooks'
@@ -28,6 +36,7 @@ export function useSwapActionHandlers(): {
   onSwitchTokens: () => void
   onUserInput: (field: Field, typedValue: string) => void
   onChangeRecipient: (recipient: string | null) => void
+  onSwitchHedge: () => void
 } {
   const dispatch = useDispatch<AppDispatch>()
   const onCurrencySelection = useCallback(
@@ -41,6 +50,10 @@ export function useSwapActionHandlers(): {
     },
     [dispatch]
   )
+
+  const onSwitchHedge = useCallback(() => {
+    dispatch(switchHedge())
+  }, [dispatch])
 
   const onSwitchTokens = useCallback(() => {
     dispatch(switchCurrencies())
@@ -64,7 +77,8 @@ export function useSwapActionHandlers(): {
     onSwitchTokens,
     onCurrencySelection,
     onUserInput,
-    onChangeRecipient
+    onChangeRecipient,
+    onSwitchHedge
   }
 }
 
@@ -270,7 +284,8 @@ export function queryParametersToSwapState(parsedQs: ParsedQs): SwapState {
     independentField: parseIndependentFieldURLParameter(parsedQs.exactField),
     recipient,
     // Eric's code
-    canHedge: false
+    canHedge: false,
+    isHedging: false
   }
 }
 
@@ -295,7 +310,8 @@ export function useDefaultsFromURLSearch():
         field: parsed.independentField,
         inputCurrencyId: parsed[Field.INPUT].currencyId,
         outputCurrencyId: parsed[Field.OUTPUT].currencyId,
-        recipient: parsed.recipient
+        recipient: parsed.recipient,
+        isHedging: false
       })
     )
 
