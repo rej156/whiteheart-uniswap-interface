@@ -219,6 +219,11 @@ export default function Swap() {
           txHash: hash
         })
 
+        // Eric's code
+        if (isHedging) {
+          onSwitchHedge()
+        }
+
         ReactGA.event({
           category: 'Swap',
           action:
