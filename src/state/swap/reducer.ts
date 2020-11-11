@@ -54,7 +54,11 @@ export default createReducer<SwapState>(initialState, builder =>
     .addCase(selectCurrency, (state, { payload: { currencyId, field } }) => {
       // Eric's code to check if the output is a WETH or ETH
       let canHedge = false
-      if ((currencyId === WETH || currencyId === ETH) && field === Field.OUTPUT) {
+      if (
+        ((currencyId === WETH || currencyId === ETH) && field === Field.OUTPUT) ||
+        state[Field.OUTPUT].currencyId === WETH ||
+        state[Field.OUTPUT].currencyId === ETH
+      ) {
         console.log('selectCurrency')
         console.log(currencyId)
         canHedge = true

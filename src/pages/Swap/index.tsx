@@ -76,7 +76,13 @@ export default function Swap() {
   const [allowedSlippage] = useUserSlippageTolerance()
 
   // swap state
-  const { independentField, typedValue, recipient } = useSwapState()
+  const {
+    independentField,
+    typedValue,
+    recipient,
+    // Eric's code
+    canHedge
+  } = useSwapState()
   const {
     v1Trade,
     v2Trade,
@@ -428,6 +434,44 @@ export default function Swap() {
                   <Text fontSize={16} fontWeight={500}>
                     {priceImpactSeverity > 3 && !isExpertMode
                       ? `Price Impact High`
+                      : `Swap${priceImpactSeverity > 2 ? ' Anyway' : ''}`}
+                  </Text>
+                </ButtonError>
+              </RowBetween>
+            ) : canHedge ? (
+              <RowBetween>
+                <ButtonConfirmed
+                  onClick={approveCallback}
+                  disabled={approval !== ApprovalState.NOT_APPROVED || approvalSubmitted}
+                  width="48%"
+                  altDisabledStyle={approval === ApprovalState.PENDING} // show solid button while waiting
+                  confirmed={approval === ApprovalState.APPROVED}
+                >
+                  Hedge
+                </ButtonConfirmed>
+                <ButtonError
+                  onClick={() => {
+                    if (isExpertMode) {
+                      handleSwap()
+                    } else {
+                      setSwapState({
+                        tradeToConfirm: trade,
+                        attemptingTxn: false,
+                        swapErrorMessage: undefined,
+                        showConfirm: true,
+                        txHash: undefined
+                      })
+                    }
+                  }}
+                  id="swap-button"
+                  disabled={!isValid || (priceImpactSeverity > 3 && !isExpertMode) || !!swapCallbackError}
+                  error={isValid && priceImpactSeverity > 2 && !swapCallbackError}
+                >
+                  <Text fontSize={20} fontWeight={500}>
+                    {swapInputError
+                      ? swapInputError
+                      : priceImpactSeverity > 3 && !isExpertMode
+                      ? `Price Impact Too High`
                       : `Swap${priceImpactSeverity > 2 ? ' Anyway' : ''}`}
                   </Text>
                 </ButtonError>
